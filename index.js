@@ -13,7 +13,28 @@ app.use(express.json())
 //connect to database
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bymrp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-const motorCollection = client.db("motorHouse").collection("cars");
+
+async function run(){
+   try{
+       await client.connect()
+       const carsCollection = client.db("motorHouse").collection("cars");
+
+       //all data load
+        app.get('/cars', async(req, res) =>{
+            const query ={}
+            const cursor = carsCollection.find(query);
+            const cars = await cursor.toArray()
+            res.send(cars)
+        })
+
+   }
+   finally{
+
+   }
+}
+
+run().catch(console.dir)
+
 
 
 
