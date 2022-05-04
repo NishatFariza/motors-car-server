@@ -37,6 +37,23 @@ async function run(){
             res.send(car)
         })
 
+
+        //update data
+        app.put('/inventory/:id', async(req, res) =>{
+            const newCar = req.body;
+            console.log(newCar);
+            const id = req.params.id; 
+            console.log(id);
+            const filter = {_id: ObjectId(id)};
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: newCar,
+              };
+            const car = await carsCollection.updateOne(filter, updateDoc, options);
+            res.send(car)
+        })
+
+
    }
    finally{
 
