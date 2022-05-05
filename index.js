@@ -53,6 +53,22 @@ async function run(){
             res.send(car)
         })
 
+        //delete api
+        app.delete('/inventory/:id', async(req, res) =>{
+            const id = req.params.id;
+            console.log(id);
+            const query = {_id: ObjectId(id)};
+            const result = await carsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        //post api
+        app.post('/inventory', async(req, res) =>{
+            const car = req.body;
+            const result = await carsCollection.insertOne(car);
+            res.send(result)
+        })
+
 
    }
    finally{
