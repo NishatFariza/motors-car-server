@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
@@ -18,6 +19,16 @@ async function run(){
    try{
        await client.connect()
        const carsCollection = client.db("motorsHouse").collection("cars");
+
+
+        //auth
+        app.post('/login', async(req, res)=>{
+            const user =req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN-SECRET, {
+                expiredIn: '1d'
+            })
+            res.send({accessToken})
+        })
 
        //all data load
         app.get('/cars', async(req, res) =>{
@@ -68,6 +79,24 @@ async function run(){
             const result = await carsCollection.insertOne(car);
             res.send(result)
         })
+
+        app.get("/inventory", async (req, res) => { 
+            // const decoddedEmail = req.decoded.email; 
+            const email = req.query.email;
+             console.log( email);
+            //   if (email === decoddedEmail) {
+               const query = { email }
+               const cursor = carsCollection.find(query) 
+               const result = await cursor.toArray(); 
+               console.log(result); 
+               res.send(result) 
+            // } 
+            //    else {
+            //         console.log("error"); 
+            //    res.status(403).send({ message: "forbidden access" })
+            
+            // }
+         })
 
 
    }
