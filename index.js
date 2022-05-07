@@ -11,6 +11,26 @@ const app = express();
 app.use(cors());
 app.use(express.json())
 
+//verified jwt
+function verifyJWT(req, res, next){
+    const authHeader = req.headers.authorization;
+    console.log(authHeader);
+    if(!authHeader){
+        return res.status(401).send({message: 'Unauthorized access'})
+    }
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
+        if(err){
+            console.log(err);
+            return res.status(403).send({message: 'Forbidden access'})
+        }
+        req.decoded=decoded
+        next()
+    })
+    // console.log('insideVerifyJWT', token);
+    // next()
+}
+
 //connect to database
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bymrp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -24,8 +44,9 @@ async function run(){
         //auth
         app.post('/login', async(req, res)=>{
             const user =req.body;
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN-SECRET, {
-                expiredIn: '1d'
+            // console.log(user);
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '30d'
             })
             res.send({accessToken})
         })
@@ -80,22 +101,22 @@ async function run(){
             res.send(result)
         })
 
-        app.get("/inventory", async (req, res) => { 
-            // const decoddedEmail = req.decoded.email; 
+        app.get("/inventory", verifyJWT, async (req, res) => { 
+            const decodedEmail = req.decoded.email; 
             const email = req.query.email;
-             console.log( email);
-            //   if (email === decoddedEmail) {
+             console.log( email, decodedEmail);
+              if (email === decodedEmail) {
                const query = { email }
                const cursor = carsCollection.find(query) 
                const result = await cursor.toArray(); 
                console.log(result); 
                res.send(result) 
-            // } 
-            //    else {
-            //         console.log("error"); 
-            //    res.status(403).send({ message: "forbidden access" })
+            } 
+               else {
+                    console.log("error"); 
+               res.status(403).send({ message: "forbidden access" })
             
-            // }
+            }
          })
 
 
