@@ -14,7 +14,7 @@ app.use(express.json())
 //verified jwt
 function verifyJWT(req, res, next){
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
+    // console.log(authHeader);
     if(!authHeader){
         return res.status(401).send({message: 'Unauthorized access'})
     }
@@ -64,7 +64,7 @@ async function run(){
         //get single data by id
         app.get('/inventory/:id', async(req, res) =>{
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const query = {_id: ObjectId(id)};
             const car = await carsCollection.findOne(query);
             res.send(car)
